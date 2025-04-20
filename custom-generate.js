@@ -6,5 +6,5 @@ javascript.javascriptGenerator.forBlock['golf_shot'] = function (block) {
 
     console.log(power);
     console.log(angle);
-  return `game.applyForce(${power}, ${angle});\n`;
+  return `game.queueCommand(${power}, ${angle});\n`;
 };
