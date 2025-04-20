@@ -47,6 +47,7 @@
                         { kind: 'block', type: 'controls_for' },
                         { kind: 'block', type: 'controls_if' },
                         { kind: 'block', type: 'math_number' },
+                        { kind: 'block', type: 'golf_start' },
                         { kind: 'block', type: 'golf_shot' }
                     ]
                 },
@@ -61,6 +62,8 @@
                 },
                 trashcan: true
             });
+
+            workspace.addChangeListener(Blockly.Events.disableOrphans);
 
             document.getElementById('run-code').addEventListener('click', function() {
                 game.reset();
