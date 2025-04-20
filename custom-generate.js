@@ -16,12 +16,21 @@ javascript.javascriptGenerator.forBlock['golf_shot'] = function (block) {
   const angle = javascript.javascriptGenerator.valueToCode(block, 'ANGLE',
     Blockly.JavaScript.ORDER_ATOMIC) || '0';
 
-    console.log(power);
-    console.log(angle);
+  console.log(power);
+  console.log(angle);
   return `game.queueCommand(${power}, ${angle});\n`;
 };
 
-javascript.javascriptGenerator.forBlock['golf_start'] = function(block) {
+javascript.javascriptGenerator.forBlock['golf_shot_with_angle'] = function (block) {
+  const power = javascript.javascriptGenerator.valueToCode(block, 'golf_shot_power', javascript.Order.ATOMIC);
+  const angle = javascript.javascriptGenerator.valueToCode(block, 'golf_shot_angle', javascript.Order.ATOMIC);
+
+  console.log(power);
+  console.log(angle);
+  return `game.queueCommand(${power}, ${angle});\n`;
+}
+
+javascript.javascriptGenerator.forBlock['golf_start'] = function (block) {
   // TODO: change Order.ATOMIC to the correct operator precedence strength
   const value_golf_input_values = javascript.javascriptGenerator.valueToCode(block, 'golf_input_values', javascript.Order.ATOMIC);
   const statement_golf_blocks = javascript.javascriptGenerator.statementToCode(block, 'golf_blocks');

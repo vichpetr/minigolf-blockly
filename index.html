@@ -42,13 +42,44 @@
             
             const workspace = Blockly.inject('blocklyDiv', {
                 toolbox: {
-                    kind: 'flyoutToolbox',
+                    kind: 'categoryToolbox',
                     contents: [
-                        { kind: 'block', type: 'controls_for' },
-                        { kind: 'block', type: 'controls_if' },
-                        { kind: 'block', type: 'math_number' },
-                        { kind: 'block', type: 'golf_start' },
-                        { kind: 'block', type: 'golf_shot' }
+                        {
+                            kind: 'category',
+                            name: 'Řídicí struktury',
+                            colour: '#5C81A6',
+                            contents: [
+                                { kind: 'block', type: 'controls_for' },
+                                { kind: 'block', type: 'controls_if' }
+                            ]
+                        },
+                        {
+                            kind: 'category',
+                            name: 'Proměnné',
+                            colour: '#A65C81',
+                            contents: [
+                                { kind: 'block', type: 'variables_set' }, // Nastavení proměnné
+                                { kind: 'block', type: 'variables_get' }  // Získání hodnoty proměnné
+                            ]
+                        },
+                        {
+                            kind: 'category',
+                            name: 'Matematika',
+                            colour: '#5CA65C',
+                            contents: [
+                                { kind: 'block', type: 'math_number' }
+                            ]
+                        },
+                        {
+                            kind: 'category',
+                            name: 'Golfové akce',
+                            colour: '#A65CA6',
+                            contents: [
+                                { kind: 'block', type: 'golf_start' },
+                                { kind: 'block', type: 'golf_shot' },
+                                { kind: 'block', type: 'golf_shot_with_angle' }
+                            ]
+                        }
                     ]
                 },
                 zoom: {

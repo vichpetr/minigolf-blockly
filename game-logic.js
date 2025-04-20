@@ -3,6 +3,29 @@ class GolfGame {
         this.canvas = document.getElementById(canvasId);
         this.ctx = this.canvas.getContext('2d');
         this.course = course;
+
+        // Načtení textur
+        this.backgroundTexture = new Image();
+        this.backgroundTexture.src = 'img/textures/background.png';
+
+        this.ballTexture = new Image();
+        this.ballTexture.src = 'img/textures/golf_ball_white.png';
+
+        this.obstacleTexture = new Image();
+        this.obstacleTexture.src = 'img/textures/rectangle_obstacle.png';
+
+        this.circleObstacleTexture = new Image();
+        this.circleObstacleTexture.src = 'img/textures/circle_obstacle.png';
+
+        this.holeTexture = new Image();
+        this.holeTexture.src = 'img/textures/hole.png';
+
+        this.flagTexture = new Image();
+        this.flagTexture.src = 'img/textures/flag.png'; // Přidání textury vlaječky
+
+        this.texturesLoaded = 0; // Počítadlo načtených textur
+        this.totalTextures = 6; // Celkový počet textur (včetně vlaječky)
+
         this.ball = {
             x: course.start.x,
             y: course.start.y,
@@ -11,7 +34,7 @@ class GolfGame {
             radius: 10
         };
         this.path = [];
-        this.allPaths = []; // Uchovává všechny trajektorie
+        this.allPaths = [];
         this.isRunning = false;
         this.commandQueue = [];
         this.commandNumber = 0;
@@ -19,9 +42,25 @@ class GolfGame {
     }
 
     init() {
+        // Po načtení každé textury zvyšte počítadlo a vykreslete, pokud jsou všechny textury načteny
+        const onTextureLoad = () => {
+            this.texturesLoaded++;
+            if (this.texturesLoaded === this.totalTextures) {
+                this.render(); // Vykreslit hru, jakmile jsou všechny textury načteny
+            }
+        };
+
+        // Přidání události onload pro každou texturu
+        this.backgroundTexture.onload = onTextureLoad;
+        this.ballTexture.onload = onTextureLoad;
+        this.obstacleTexture.onload = onTextureLoad;
+        this.circleObstacleTexture.onload = onTextureLoad;
+        this.holeTexture.onload = onTextureLoad;
+        this.flagTexture.onload = onTextureLoad; // Načtení vlaječky
+
+        // Nastavení velikosti plátna
         this.canvas.width = 800;
         this.canvas.height = 600;
-        this.render();
     }
 
     queueCommand(power, angle) {
@@ -38,16 +77,14 @@ class GolfGame {
         }
 
         const { power, angle, commandNumber } = this.commandQueue.shift();
-        //console.log(`Procesing command ${commandNumber}: Power ${power}, Angle ${angle}`)
         this.applyForce(power, angle, commandNumber);
     }
 
     applyForce(power, angle, commandNumber) {
         this.isRunning = true;
 
-        // Přidat novou trajektorii do allPaths a zahrnout aktuální pozici míčku jako první bod
         this.allPaths.push({
-            path: [{ x: this.ball.x, y: this.ball.y }], // Přidat aktuální pozici míčku
+            path: [{ x: this.ball.x, y: this.ball.y }],
             commandNumber
         });
 
@@ -77,7 +114,6 @@ class GolfGame {
             const angle = Math.atan2(dy, dx);
             const speed = Math.hypot(this.ball.vx, this.ball.vy);
 
-            // Odraz s 80% zachováním rychlosti
             this.ball.vx = Math.cos(angle) * speed * 0.8;
             this.ball.vy = Math.sin(angle) * speed * 0.8;
         }
@@ -92,7 +128,6 @@ class GolfGame {
             ballNextY + this.ball.radius > obs.y &&
             ballNextY - this.ball.radius < obs.y + obs.height) {
 
-            // Určení strany kolize
             const overlapX = Math.min(
                 Math.abs(ballNextX + this.ball.radius - obs.x),
                 Math.abs(ballNextX - this.ball.radius - (obs.x + obs.width))
@@ -103,7 +138,6 @@ class GolfGame {
                 Math.abs(ballNextY - this.ball.radius - (obs.y + obs.height))
             );
 
-            // Odraz podle dominující osy
             if (overlapX < overlapY) {
                 this.ball.vx *= -0.8;
             } else {
@@ -115,7 +149,6 @@ class GolfGame {
     checkBoundaries() {
         const canvas = this.canvas;
 
-        // Reset při vypadnutí z hřiště
         if (this.ball.x < -100 ||
             this.ball.x > canvas.width + 100 ||
             this.ball.y < -100 ||
@@ -124,7 +157,6 @@ class GolfGame {
             return;
         }
 
-        // Odraz od okrajů
         if (this.ball.x - this.ball.radius < 0 ||
             this.ball.x + this.ball.radius > canvas.width) {
             this.ball.vx *= -0.8;
@@ -150,7 +182,6 @@ class GolfGame {
         this.ball.vx *= 0.98;
         this.ball.vy *= 0.98;
 
-        // Přidat aktuální bod do poslední trajektorie v allPaths
         const currentPath = this.allPaths[this.allPaths.length - 1].path;
         currentPath.push({ x: this.ball.x, y: this.ball.y });
 
@@ -161,12 +192,15 @@ class GolfGame {
             setTimeout(() => this.gameLoop(), 50);
         } else {
             this.stopGame();
-            this.processQueue(); // Zpracovat další příkaz z fronty
+            this.processQueue();
         }
     }
 
     render() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+        // Vykreslení pozadí
+        this.ctx.drawImage(this.backgroundTexture, 0, 0, this.canvas.width, this.canvas.height);
 
         // Vykreslení všech trajektorií
         this.allPaths.forEach(({ path, commandNumber }) => {
@@ -197,31 +231,53 @@ class GolfGame {
             }
         });
 
-        // Překážky
+        // Vykreslení překážek
         this.course.obstacles.forEach(obs => {
             if (obs.type === 'circle') {
-                this.ctx.beginPath();
-                this.ctx.arc(obs.x, obs.y, obs.radius, 0, Math.PI * 2);
-                this.ctx.fillStyle = '#666';
-                this.ctx.fill();
+                this.ctx.drawImage(
+                    this.circleObstacleTexture,
+                    obs.x - obs.radius,
+                    obs.y - obs.radius,
+                    obs.radius * 2,
+                    obs.radius * 2
+                );
             } else {
-                this.ctx.fillStyle = '#444';
-                this.ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+                this.ctx.drawImage(
+                    this.obstacleTexture,
+                    obs.x,
+                    obs.y,
+                    obs.width,
+                    obs.height
+                );
             }
         });
 
-        // Jamka
-        this.ctx.beginPath();
-        this.ctx.arc(this.course.hole.x, this.course.hole.y,
-            this.course.hole.radius, 0, Math.PI * 2);
-        this.ctx.fillStyle = 'black';
-        this.ctx.fill();
+        // Vykreslení jamky
+        this.ctx.drawImage(
+            this.holeTexture,
+            this.course.hole.x - this.course.hole.radius,
+            this.course.hole.y - this.course.hole.radius,
+            this.course.hole.radius * 2,
+            this.course.hole.radius * 2
+        );
 
-        // Míček
-        this.ctx.beginPath();
-        this.ctx.arc(this.ball.x, this.ball.y, this.ball.radius, 0, Math.PI * 2);
-        this.ctx.fillStyle = 'red';
-        this.ctx.fill();
+        // Vykreslení vlaječky nad jamkou
+        this.ctx.drawImage(
+            this.flagTexture,
+            this.course.hole.x - this.course.hole.radius / 2, // Posun vlaječky na střed jamky
+            this.course.hole.y - this.course.hole.radius * 3, // Posun vlaječky nahoru
+            this.course.hole.radius, // Šířka vlaječky
+            this.course.hole.radius * 3 // Výška vlaječky
+        );
+
+        // Vykreslení míčku
+        this.ctx.drawImage(
+            this.ballTexture,
+            this.ball.x - this.ball.radius,
+            this.ball.y - this.ball.radius,
+            this.ball.radius * 2,
+            this.ball.radius * 2
+        );
     }
 
     stopGame() {
@@ -233,10 +289,10 @@ class GolfGame {
     reset() {
         this.stopGame();
         this.commandQueue = [];
-        this.commandNumber = 0; // Resetovat čítač tahů
+        this.commandNumber = 0;
         this.currentCommandNumber = 0;
         this.path = [];
-        this.allPaths = []; // Resetovat všechny trajektorie
+        this.allPaths = [];
         this.ball.x = this.course.start.x;
         this.ball.y = this.course.start.y;
         this.render();
