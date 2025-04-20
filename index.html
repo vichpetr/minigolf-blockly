@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blockly Minigolf</title>
+    <script src="blockly/blockly_compressed.js"></script>
+    <script src="blockly/blocks_compressed.js"></script>
+    <script src="blockly/javascript_compressed.js"></script>
+    <script src="blockly/msg/en.js"></script>
+    <link rel="stylesheet" href="main.css">    
+</head>
+<body>
+    <div class="container">
+        <div class="left-panel">
+          <div id="blocklyDiv"></div>
+          <button id="run-code">Spustit kód</button>
+        </div>
+        <div class="right-panel">
+          <canvas id="gameCanvas" width="800" height="600"></canvas>
+        </div>
+      </div>
+
+    <script src="custom-blocks.js"></script>
+    <script src="custom-generate.js"></script>
+    <script src="game-logic.js"></script>
+    
+    <script>
+        let game;
+
+        window.onload = async function() {
+            // Načtení konfigurace hřiště
+            const response = await fetch('courses.json');
+            const courses = await response.json();
+            
+            // Inicializace hry
+            game = new GolfGame('gameCanvas', courses.courses[0]);
+            game.init();
+
+            // Blockly konfigurace
+            Blockly.common.defineBlocks(Blockly.common.createBlockDefinitionsFromJsonArray(MY_BLOCKS));
+            
+            const workspace = Blockly.inject('blocklyDiv', {
+                toolbox: {
+                    kind: 'flyoutToolbox',
+                    contents: [
+                        { kind: 'block', type: 'controls_for' },
+                        { kind: 'block', type: 'controls_if' },
+                        { kind: 'block', type: 'math_number' },
+                        { kind: 'block', type: 'golf_shot' }
+                    ]
+                },
+                zoom: {
+                    controls: true,
+                    wheel: true,
+                    startScale: 1.0,
+                    maxScale: 3,
+                    minScale: 0.3,
+                    scaleSpeed: 1.2,
+                    pinch: true
+                },
+                trashcan: true
+            });
+
+            document.getElementById('run-code').addEventListener('click', function() {
+                game.reset();
+                const code = Blockly.JavaScript.workspaceToCode(workspace);
+                try {
+                    eval(code);
+                    game.gameLoop();
+                } catch (e) {
+                    console.error('Chyba v kódu:', e);
+                }
+            });
+        };
+    </script>
+</body>
+</html>

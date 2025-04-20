@@ -1,0 +1,52 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+  .container {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+  }
+  .left-panel, .right-panel {
+    height: 100vh;
+    box-sizing: border-box;
+  }
+  .left-panel {
+    width: 50vw;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    background: #f9f9f9;
+    border-right: 1px solid #ccc;
+    padding: 0;
+  }
+  #blocklyDiv {
+    flex: 1 1 auto;
+    width: 100%;
+    min-height: 0;
+  }
+  #run-code {
+    width: 100%;
+    padding: 20px 0;
+    font-size: 1.2em;
+    border: none;
+    background: #4CAF50;
+    color: white;
+    cursor: pointer;
+    border-top: 1px solid #ccc;
+  }
+  .right-panel {
+    width: 50vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #eaf4ea;
+  }
+  #gameCanvas {
+    max-width: 90%;
+    max-height: 90%;
+    border: 2px solid #333;
+    background: #8fbc8f;
+  }
+  
