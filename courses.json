@@ -5,7 +5,7 @@
             "start": {"x": 50, "y": 550},
             "hole": {"x": 700, "y": 50, "radius": 20},
             "obstacles": [
-                {"type": "rect", "x": 200, "y": 300, "width": 50, "height": 100},
+                {"type": "rect", "x": 200, "y": 300, "width": 250, "height": 100},
                 {"type": "circle", "x": 500, "y": 400, "radius": 40}
             ]
         },

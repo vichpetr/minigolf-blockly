@@ -9,7 +9,7 @@ class GolfGame {
         this.backgroundTexture.src = 'img/textures/background.png';
 
         this.ballTexture = new Image();
-        this.ballTexture.src = 'img/textures/golf_ball_white.png';
+        this.ballTexture.src = 'img/textures/golf_ball_blue.png';
 
         this.obstacleTexture = new Image();
         this.obstacleTexture.src = 'img/textures/rectangle_obstacle.png';
@@ -21,10 +21,13 @@ class GolfGame {
         this.holeTexture.src = 'img/textures/hole.png';
 
         this.flagTexture = new Image();
-        this.flagTexture.src = 'img/textures/flag.png'; // Přidání textury vlaječky
+        this.flagTexture.src = 'img/textures/flag.png';
+
+        this.startTexture = new Image();
+        this.startTexture.src = 'img/textures/start.png'; // Přidání textury startu
 
         this.texturesLoaded = 0; // Počítadlo načtených textur
-        this.totalTextures = 6; // Celkový počet textur (včetně vlaječky)
+        this.totalTextures = 7; // Celkový počet textur (včetně startu)
 
         this.ball = {
             x: course.start.x,
@@ -56,7 +59,8 @@ class GolfGame {
         this.obstacleTexture.onload = onTextureLoad;
         this.circleObstacleTexture.onload = onTextureLoad;
         this.holeTexture.onload = onTextureLoad;
-        this.flagTexture.onload = onTextureLoad; // Načtení vlaječky
+        this.flagTexture.onload = onTextureLoad;
+        this.startTexture.onload = onTextureLoad; // Načtení textury startu
 
         // Nastavení velikosti plátna
         this.canvas.width = 800;
@@ -202,6 +206,15 @@ class GolfGame {
         // Vykreslení pozadí
         this.ctx.drawImage(this.backgroundTexture, 0, 0, this.canvas.width, this.canvas.height);
 
+        // Vykreslení startu
+        this.ctx.drawImage(
+            this.startTexture,
+            this.course.start.x - 20, // Posun pro zarovnání textury
+            this.course.start.y - 20, // Posun pro zarovnání textury
+            40, // Šířka textury
+            40  // Výška textury
+        );
+
         // Vykreslení všech trajektorií
         this.allPaths.forEach(({ path, commandNumber }) => {
             if (path.length > 1) {
@@ -264,10 +277,10 @@ class GolfGame {
         // Vykreslení vlaječky nad jamkou
         this.ctx.drawImage(
             this.flagTexture,
-            this.course.hole.x - this.course.hole.radius / 2, // Posun vlaječky na střed jamky
-            this.course.hole.y - this.course.hole.radius * 3, // Posun vlaječky nahoru
-            this.course.hole.radius, // Šířka vlaječky
-            this.course.hole.radius * 3 // Výška vlaječky
+            this.course.hole.x - this.course.hole.radius / 2,
+            this.course.hole.y - this.course.hole.radius * 3,
+            this.course.hole.radius,
+            this.course.hole.radius * 3
         );
 
         // Vykreslení míčku
