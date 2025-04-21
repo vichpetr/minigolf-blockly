@@ -6,20 +6,20 @@ html, body {
   .container {
     display: flex;
     height: 100vh;
-    width: 100vw;
   }
   .left-panel, .right-panel {
     height: 100vh;
     box-sizing: border-box;
   }
   .left-panel {
-    width: 50vw;
+    width: 30%;
+    padding: 10px;
+    border-right: 1px solid #ccc;
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
     align-items: stretch;
     background: #f9f9f9;
-    border-right: 1px solid #ccc;
-    padding: 0;
   }
   #blocklyDiv {
     flex: 1 1 auto;
@@ -37,10 +37,12 @@ html, body {
     border-top: 1px solid #ccc;
   }
   .right-panel {
-    width: 50vw;
+    width: 70%;
     display: flex;
-    justify-content: center;
+    flex-direction: column; /* Uspořádání obsahu ve sloupci */
     align-items: center;
+    padding: 10px;
+    position: relative;
     background: #eaf4ea;
   }
   #gameCanvas {
@@ -49,4 +51,58 @@ html, body {
     border: 2px solid #333;
     background: #8fbc8f;
   }
-  
+
+  .level-selector {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: #f8f8f8;
+    border-bottom: 1px solid #ccc;
+    position: sticky; /* Zajistí, že zůstane nahoře */
+    top: 0;
+    z-index: 10;
+  }
+
+  .level-selector button {
+    margin: 0 5px;
+    padding: 10px 20px;
+    font-size: 14px;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    background-color: #e0e0e0;
+    border-radius: 5px;
+    position: relative;
+  }
+
+  .level-selector button:hover {
+    background-color: #d0d0d0;
+  }
+
+  .level-selector button::after {
+    content: attr(data-title); /* Zobrazí název levelu */
+    position: absolute;
+    bottom: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #333;
+    color: #fff;
+    padding: 5px 10px;
+    font-size: 12px;
+    border-radius: 3px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+
+  .level-selector button:hover::after {
+    opacity: 1;
+  }
+
+  canvas {
+    flex-grow: 1; /* Zajistí, že plátno zabere zbytek prostoru */
+    border: 1px solid #ccc;
+    background-color: #fff;
+  }

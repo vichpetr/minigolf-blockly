@@ -17,9 +17,12 @@
           <button id="run-code">Spustit kód</button>
         </div>
         <div class="right-panel">
+            <div id="level-selector" class="level-selector">
+                <!-- Tlačítka levelů budou generována dynamicky -->
+            </div>
           <canvas id="gameCanvas" width="800" height="600"></canvas>
         </div>
-      </div>
+    </div>
 
     <script src="custom-blocks.js"></script>
     <script src="custom-generate.js"></script>
@@ -34,7 +37,7 @@
             const courses = await response.json();
             
             // Inicializace hry
-            game = new GolfGame('gameCanvas', courses.courses[0]);
+            game = new GolfGame('gameCanvas', courses.courses[0], courses.courses);
             game.init();
 
             // Blockly konfigurace

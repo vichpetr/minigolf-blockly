@@ -1,8 +1,9 @@
 class GolfGame {
-    constructor(canvasId, course) {
+    constructor(canvasId, course, levels) {
         this.canvas = document.getElementById(canvasId);
         this.ctx = this.canvas.getContext('2d');
         this.course = course;
+        this.levels = levels; // Seznam levelů
 
         // Načtení textur
         this.backgroundTexture = new Image();
@@ -65,6 +66,34 @@ class GolfGame {
         // Nastavení velikosti plátna
         this.canvas.width = 800;
         this.canvas.height = 600;
+
+        // Vygenerovat tlačítka levelů
+        this.generateLevelButtons();
+    }
+
+    generateLevelButtons() {
+        const levelSelector = document.getElementById('level-selector');
+        levelSelector.innerHTML = ''; // Vyčistit předchozí obsah
+
+        this.levels.forEach((level, index) => {
+            const button = document.createElement('button');
+            button.textContent = `Level ${index + 1}`;
+            button.setAttribute('data-title', level.name); // Nastavit název levelu jako tooltip
+            button.addEventListener('click', () => this.loadLevel(index));
+            levelSelector.appendChild(button);
+        });
+    }
+
+    loadLevel(levelIndex) {
+        const selectedLevel = this.levels[levelIndex];
+        this.course = selectedLevel;
+
+        // Nastavit míček na startovní pozici
+        this.ball.x = selectedLevel.start.x;
+        this.ball.y = selectedLevel.start.y;
+
+        // Resetovat hru
+        this.reset();
     }
 
     queueCommand(power, angle) {
@@ -306,8 +335,6 @@ class GolfGame {
         this.currentCommandNumber = 0;
         this.path = [];
         this.allPaths = [];
-        this.ball.x = this.course.start.x;
-        this.ball.y = this.course.start.y;
         this.render();
     }
 }
