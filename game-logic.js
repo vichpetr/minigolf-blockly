@@ -3,7 +3,7 @@ class GolfGame {
         this.canvas = document.getElementById(canvasId);
         this.ctx = this.canvas.getContext('2d');
         this.course = course;
-        this.levels = levels; // Seznam levelů
+        this.levels = levels;
 
         // Načtení textur
         this.backgroundTexture = new Image();
@@ -25,10 +25,13 @@ class GolfGame {
         this.flagTexture.src = 'img/textures/flag.png';
 
         this.startTexture = new Image();
-        this.startTexture.src = 'img/textures/start.png'; // Přidání textury startu
+        this.startTexture.src = 'img/textures/start.png';
 
-        this.texturesLoaded = 0; // Počítadlo načtených textur
-        this.totalTextures = 7; // Celkový počet textur (včetně startu)
+        this.woodTexture = new Image(); // Přidání textury dřeva
+        this.woodTexture.src = 'img/textures/rectangle_obstacle.png';
+
+        this.texturesLoaded = 0;
+        this.totalTextures = 8; // Aktualizováno pro novou texturu
 
         this.ball = {
             x: course.start.x,
@@ -61,7 +64,8 @@ class GolfGame {
         this.circleObstacleTexture.onload = onTextureLoad;
         this.holeTexture.onload = onTextureLoad;
         this.flagTexture.onload = onTextureLoad;
-        this.startTexture.onload = onTextureLoad; // Načtení textury startu
+        this.startTexture.onload = onTextureLoad;
+        this.woodTexture.onload = onTextureLoad;
 
         // Nastavení velikosti plátna
         this.canvas.width = 800;
@@ -69,6 +73,16 @@ class GolfGame {
 
         // Vygenerovat tlačítka levelů
         this.generateLevelButtons();
+
+        // Přidání posluchače události myši
+        this.mouseX = 0;
+        this.mouseY = 0;
+        this.canvas.addEventListener('mousemove', (event) => {
+            const rect = this.canvas.getBoundingClientRect();
+            this.mouseX = event.clientX - rect.left;
+            this.mouseY = event.clientY - rect.top;
+            this.render(); // Aktualizovat vykreslení
+        });
     }
 
     generateLevelButtons() {
@@ -88,12 +102,51 @@ class GolfGame {
         const selectedLevel = this.levels[levelIndex];
         this.course = selectedLevel;
 
+        // Zkontrolovat, zda start je uvnitř hranic
+        if (!this.isPointInsideBounds(selectedLevel.start.x, selectedLevel.start.y)) {
+            console.error('Start position is outside the bounds!');
+            //return;
+        }
+
+        // Zkontrolovat, zda jamka je uvnitř hranic
+        if (!this.isPointInsideBounds(selectedLevel.hole.x, selectedLevel.hole.y)) {
+            console.error('Hole position is outside the bounds!');
+            return;
+        }
+
         // Nastavit míček na startovní pozici
         this.ball.x = selectedLevel.start.x;
         this.ball.y = selectedLevel.start.y;
+        this.ball.vx = 0;
+        this.ball.vy = 0;
 
         // Resetovat hru
         this.reset();
+    }
+
+    isPointInsideBounds(x, y) {
+        if (this.course.bounds.type === 'circle') {
+            const dx = x - this.course.bounds.x;
+            const dy = y - this.course.bounds.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            return distance <= this.course.bounds.radius;
+        } else if (this.course.bounds.type === 'polygon') {
+            return this.isPointInsidePolygon(x, y, this.course.bounds.points);
+        }
+        return false;
+    }
+
+    isPointInsidePolygon(x, y, points) {
+        let inside = false;
+        for (let i = 0, j = points.length - 1; i < points.length; j = i++) {
+            const xi = points[i].x, yi = points[i].y;
+            const xj = points[j].x, yj = points[j].y;
+
+            const intersect = ((yi > y) !== (yj > y)) &&
+                              (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+            if (intersect) inside = !inside;
+        }
+        return inside;
     }
 
     queueCommand(power, angle) {
@@ -135,6 +188,20 @@ class GolfGame {
                 this.handleRectCollision(obs);
             }
         });
+
+        // Kontrola, zda míček dosáhl jamky, až po jeho zastavení
+        if (Math.hypot(this.ball.vx, this.ball.vy) < 0.1) { // Míček se zastavil
+            const dx = this.ball.x - this.course.hole.x;
+            const dy = this.ball.y - this.course.hole.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < this.course.hole.radius) {
+                console.log('Ball reached the hole! Level complete.');
+                this.stopGame(); // Ukončit hru
+                return;
+            }
+        }
+
         this.checkBoundaries();
     }
 
@@ -180,28 +247,29 @@ class GolfGame {
     }
 
     checkBoundaries() {
-        const canvas = this.canvas;
+        if (this.course.bounds.type === 'circle') {
+            const dx = this.ball.x - this.course.bounds.x;
+            const dy = this.ball.y - this.course.bounds.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
 
-        if (this.ball.x < -100 ||
-            this.ball.x > canvas.width + 100 ||
-            this.ball.y < -100 ||
-            this.ball.y > canvas.height + 100) {
-            this.reset();
-            return;
-        }
+            if (distance > this.course.bounds.radius - this.ball.radius) {
+                // Odraz od kruhové hranice
+                const angle = Math.atan2(dy, dx);
+                const speed = Math.hypot(this.ball.vx, this.ball.vy);
 
-        if (this.ball.x - this.ball.radius < 0 ||
-            this.ball.x + this.ball.radius > canvas.width) {
-            this.ball.vx *= -0.8;
-            this.ball.x = Math.max(this.ball.radius,
-                Math.min(canvas.width - this.ball.radius, this.ball.x));
-        }
+                this.ball.vx = Math.cos(angle) * speed * -0.8;
+                this.ball.vy = Math.sin(angle) * speed * -0.8;
 
-        if (this.ball.y - this.ball.radius < 0 ||
-            this.ball.y + this.ball.radius > canvas.height) {
-            this.ball.vy *= -0.8;
-            this.ball.y = Math.max(this.ball.radius,
-                Math.min(canvas.height - this.ball.radius, this.ball.y));
+                // Posun míčku zpět do hranic
+                const overlap = distance - (this.course.bounds.radius - this.ball.radius);
+                this.ball.x -= Math.cos(angle) * overlap;
+                this.ball.y -= Math.sin(angle) * overlap;
+            }
+        } else if (this.course.bounds.type === 'polygon') {
+            if (!this.isPointInsidePolygon(this.ball.x, this.ball.y, this.course.bounds.points)) {
+                console.warn('Ball hit the polygon boundary!');
+                this.reset(); // Resetovat hru, pokud míček opustí hranice
+            }
         }
     }
 
@@ -224,6 +292,7 @@ class GolfGame {
         if (Math.hypot(this.ball.vx, this.ball.vy) > 0.1) {
             setTimeout(() => this.gameLoop(), 50);
         } else {
+            this.checkCollisions(); // Zkontrolovat jamku po zastavení
             this.stopGame();
             this.processQueue();
         }
@@ -232,19 +301,83 @@ class GolfGame {
     render() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-        // Vykreslení pozadí
-        this.ctx.drawImage(this.backgroundTexture, 0, 0, this.canvas.width, this.canvas.height);
+        // Vykreslení ohraničení herního plánu pomocí textury dřeva
+        if (this.course.bounds) {
+            this.ctx.save(); // Uložit aktuální stav kontextu
 
-        // Vykreslení startu
-        this.ctx.drawImage(
-            this.startTexture,
-            this.course.start.x - 20, // Posun pro zarovnání textury
-            this.course.start.y - 20, // Posun pro zarovnání textury
-            40, // Šířka textury
-            40  // Výška textury
-        );
+            // Vnější hranice (větší oblast)
+            this.ctx.beginPath();
+            if (this.course.bounds.type === 'circle') {
+                const { x, y, radius } = this.course.bounds;
+                this.ctx.arc(x, y, radius + 30, 0, Math.PI * 2); // Větší kruh (ohraničení)
+            } else if (this.course.bounds.type === 'polygon') {
+                const points = this.course.bounds.points;
+                this.ctx.moveTo(points[0].x, points[0].y);
+                for (let i = 1; i < points.length; i++) {
+                    this.ctx.lineTo(points[i].x, points[i].y);
+                }
+                this.ctx.closePath();
+            }
+            this.ctx.clip(); // Omezit vykreslování na vnější hranici
 
-        // Vykreslení všech trajektorií
+            // Vykreslení textury dřeva
+            const pattern = this.ctx.createPattern(this.woodTexture, 'repeat');
+            this.ctx.fillStyle = pattern;
+            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+            // Vnitřní hranice (menší oblast)
+            this.ctx.beginPath();
+            if (this.course.bounds.type === 'circle') {
+                const { x, y, radius } = this.course.bounds;
+                this.ctx.arc(x, y, radius, 0, Math.PI * 2); // Menší kruh (vnitřní hranice)
+            } else if (this.course.bounds.type === 'polygon') {
+                const points = this.course.bounds.points;
+                this.ctx.moveTo(points[0].x, points[0].y);
+                for (let i = 1; i < points.length; i++) {
+                    this.ctx.lineTo(points[i].x, points[i].y);
+                }
+                this.ctx.closePath();
+            }
+            this.ctx.globalCompositeOperation = 'destination-out'; // Vyříznutí vnitřní oblasti
+            this.ctx.fill();
+
+            this.ctx.restore(); // Obnovit stav kontextu
+        }
+
+        // Vykreslení pozadí herního plánu
+        if (this.course.bounds) {
+            this.ctx.save();
+            this.ctx.beginPath();
+            if (this.course.bounds.type === 'circle') {
+                const { x, y, radius } = this.course.bounds;
+                this.ctx.arc(x, y, radius, 0, Math.PI * 2);
+            } else if (this.course.bounds.type === 'polygon') {
+                const points = this.course.bounds.points;
+                this.ctx.moveTo(points[0].x, points[0].y);
+                for (let i = 1; i < points.length; i++) {
+                    this.ctx.lineTo(points[i].x, points[i].y);
+                }
+                this.ctx.closePath();
+            }
+            this.ctx.clip();
+
+            // Vykreslení pozadí
+            this.ctx.drawImage(this.backgroundTexture, 0, 0, this.canvas.width, this.canvas.height);
+
+            this.ctx.restore();
+        }
+
+        // Vykreslení dalších prvků (startovní pozice, překážky, jamka, vlaječka, míček)
+        this.renderGameElements();
+
+         // Vykreslení souřadnic myši
+    this.ctx.font = '14px Arial';
+    this.ctx.fillStyle = 'black';
+    this.ctx.fillText(`X: ${Math.round(this.mouseX)}, Y: ${Math.round(this.mouseY)}`, 10, 20);
+    }
+
+    renderGameElements() {
+        // Vykreslení trajektorie
         this.allPaths.forEach(({ path, commandNumber }) => {
             if (path.length > 1) {
                 this.ctx.beginPath();
@@ -260,18 +393,20 @@ class GolfGame {
                 this.ctx.setLineDash([]);
 
                 // Vykreslení čísla tahu na začátku trajektorie
-                this.ctx.beginPath();
-                this.ctx.arc(path[0].x, path[0].y, 15, 0, Math.PI * 2);
-                this.ctx.fillStyle = 'yellow';
-                this.ctx.fill();
-                this.ctx.strokeStyle = 'black';
-                this.ctx.stroke();
-
                 this.ctx.font = '14px Arial';
                 this.ctx.fillStyle = 'black';
                 this.ctx.fillText(commandNumber, path[0].x - 5, path[0].y + 5);
             }
         });
+
+        // Vykreslení startovní pozice
+        this.ctx.drawImage(
+            this.startTexture,
+            this.course.start.x - 20, // Posun pro zarovnání textury
+            this.course.start.y - 20, // Posun pro zarovnání textury
+            40, // Šířka textury
+            40  // Výška textury
+        );
 
         // Vykreslení překážek
         this.course.obstacles.forEach(obs => {
@@ -295,21 +430,22 @@ class GolfGame {
         });
 
         // Vykreslení jamky
+        const holeSizeMultiplier = 0.6;
         this.ctx.drawImage(
             this.holeTexture,
-            this.course.hole.x - this.course.hole.radius,
-            this.course.hole.y - this.course.hole.radius,
-            this.course.hole.radius * 2,
-            this.course.hole.radius * 2
+            this.course.hole.x - (this.course.hole.radius * holeSizeMultiplier),
+            this.course.hole.y - (this.course.hole.radius * holeSizeMultiplier),
+            this.course.hole.radius * 2 * holeSizeMultiplier,
+            this.course.hole.radius * 2 * holeSizeMultiplier
         );
 
         // Vykreslení vlaječky nad jamkou
         this.ctx.drawImage(
             this.flagTexture,
-            this.course.hole.x - this.course.hole.radius / 2,
-            this.course.hole.y - this.course.hole.radius * 3,
-            this.course.hole.radius,
-            this.course.hole.radius * 3
+            this.course.hole.x - (this.course.hole.radius / 2 - holeSizeMultiplier), // Posun vlaječky na střed jamky
+            this.course.hole.y - this.course.hole.radius * 3, // Posun vlaječky nahoru
+            this.course.hole.radius, // Šířka vlaječky
+            this.course.hole.radius * 3 // Výška vlaječky
         );
 
         // Vykreslení míčku
@@ -326,6 +462,7 @@ class GolfGame {
         this.isRunning = false;
         this.ball.vx = 0;
         this.ball.vy = 0;
+        console.log('Game stopped.');
     }
 
     reset() {
@@ -335,6 +472,13 @@ class GolfGame {
         this.currentCommandNumber = 0;
         this.path = [];
         this.allPaths = [];
+
+        // Vrátit míček na startovní pozici
+        this.ball.x = this.course.start.x;
+        this.ball.y = this.course.start.y;
+        this.ball.vx = 0;
+        this.ball.vy = 0;
+
         this.render();
     }
 }
