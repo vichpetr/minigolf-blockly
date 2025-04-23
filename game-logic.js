@@ -182,6 +182,7 @@ class GolfGame {
 
     checkCollisions() {
         this.course.obstacles.forEach(obs => {
+            obs.rotation = obs.rotation || 0; // Nastaví výchozí rotaci na 0, pokud není definována
             if (obs.type === 'circle') {
                 this.handleCircleCollision(obs);
             } else {
@@ -418,14 +419,27 @@ class GolfGame {
                     obs.radius * 2,
                     obs.radius * 2
                 );
-            } else {
+            } else if (obs.type === 'rect') {
+                this.ctx.save(); // Uloží aktuální stav kontextu
+
+                // Přesuneme střed rotace na střed překážky
+                const centerX = obs.x + obs.width / 2;
+                const centerY = obs.y + obs.height / 2;
+                this.ctx.translate(centerX, centerY);
+
+                // Aplikujeme rotaci
+                this.ctx.rotate((obs.rotation * Math.PI) / 180);
+
+                // Vykreslíme překážku s posunem zpět na její pozici
                 this.ctx.drawImage(
                     this.obstacleTexture,
-                    obs.x,
-                    obs.y,
+                    -obs.width / 2, // Posun na střed
+                    -obs.height / 2, // Posun na střed
                     obs.width,
                     obs.height
                 );
+
+                this.ctx.restore(); // Obnoví původní stav kontextu
             }
         });
 
