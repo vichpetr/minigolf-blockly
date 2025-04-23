@@ -1,6 +1,53 @@
 {
     "courses": [
         {
+            "name": "Level X Shape",
+            "start": {"x": 700, "y": 520},
+            "hole": {"x": 700, "y": 100, "radius": 25},
+            "bounds": {
+                "type": "polygon",
+                "points": [
+                    {"x": 50, "y": 50},
+                    {"x": 150, "y": 50},
+                    {"x": 400, "y": 250},
+                    {"x": 650, "y": 50},
+                    {"x": 750, "y": 50},
+                    {"x": 750, "y": 150},
+                    {"x": 550, "y": 300},
+                    {"x": 750, "y": 450},
+                    {"x": 750, "y": 550},
+                    {"x": 650, "y": 550},
+                    {"x": 400, "y": 350},
+                    {"x": 150, "y": 550},
+                    {"x": 50, "y": 550},
+                    {"x": 50, "y": 450},
+                    {"x": 250, "y": 300},
+                    {"x": 50, "y": 150}
+                ]
+            },
+            "obstacles": [
+                {"type": "rect", "x": 50, "y": 50, "width": 100, "height": 10, "rotation": 0},
+                {"type": "rect", "x": 650, "y": 50, "width": 100, "height": 10, "rotation": 0},
+                {"type": "rect", "x": 50, "y": 550, "width": 100, "height": 10, "rotation": 0},
+                {"type": "rect", "x": 650, "y": 550, "width": 100, "height": 10, "rotation": 0},
+                {"type": "rect", "x": 5, "y": 100, "width": 100, "height": 10, "rotation": 90},
+                {"type": "rect", "x": 695, "y": 100, "width": 100, "height": 10, "rotation": 90},
+                {"type": "rect", "x": 5, "y": 495, "width": 100, "height": 10, "rotation": 90},
+                {"type": "rect", "x": 695, "y": 495, "width": 100, "height": 10, "rotation": 90},
+                {"type": "rect", "x": 268, "y": 287, "width": 10, "height": 330, "rotation": 51},
+                {"type": "rect", "x": 521, "y": -8, "width": 10, "height": 325, "rotation": 51.5},
+                {"type": "rect", "x": 268, "y": -11, "width": 10, "height": 330, "rotation": -51.5},
+                {"type": "rect", "x": 520, "y": 285, "width": 10, "height": 330, "rotation": -51},
+                {"type": "rect", "x": 643, "y": 100, "width": 10, "height": 250, "rotation": 53},
+                {"type": "rect", "x": 147, "y": 252, "width": 10, "height": 250, "rotation": 53},
+                {"type": "rect", "x": 645, "y": 245, "width": 10, "height": 255, "rotation": -52},
+                {"type": "rect", "x": 150, "y": 100, "width": 10, "height": 255, "rotation": -53},
+                {"type": "rect", "x": 243, "y": 100, "width": 10, "height": 250, "rotation": -53},
+                {"type": "rect", "x": 243, "y": 270, "width": 10, "height": 250, "rotation": 53},
+                {"type": "rect", "x": 434, "y": 200, "width": 10, "height": 210, "rotation": 87}
+            ]
+        },
+        {
             "name": "Level Z Shape",
             "start": {"x": 100, "y": 500},
             "hole": {"x": 700, "y": 100, "radius": 25},
@@ -69,36 +116,6 @@
                 {"type": "rect", "x": 200, "y": 155, "width": 450, "height": 10, "rotation": 0},
                 {"type": "rect", "x": 400, "y": 160, "width": 10, "height": 400, "rotation": 0},
                 {"type": "rect", "x": 200, "y": 160, "width": 10, "height": 300, "rotation": 0}
-            ]
-        },
-        {
-            "name": "Level X Shape",
-            "start": {"x": 400, "y": 300},
-            "hole": {"x": 700, "y": 50, "radius": 25},
-            "bounds": {
-                "type": "polygon",
-                "points": [
-                    {"x": 50, "y": 50},
-                    {"x": 150, "y": 50},
-                    {"x": 400, "y": 250},
-                    {"x": 650, "y": 50},
-                    {"x": 750, "y": 50},
-                    {"x": 750, "y": 150},
-                    {"x": 550, "y": 300},
-                    {"x": 750, "y": 450},
-                    {"x": 750, "y": 550},
-                    {"x": 650, "y": 550},
-                    {"x": 400, "y": 350},
-                    {"x": 150, "y": 550},
-                    {"x": 50, "y": 550},
-                    {"x": 50, "y": 450},
-                    {"x": 250, "y": 300},
-                    {"x": 50, "y": 150}
-                ]
-            },
-            "obstacles": [
-                {"type": "rect", "x": 250, "y": 300, "width": 300, "height": 10, "rotation": 0},
-                {"type": "rect", "x": 400, "y": 150, "width": 10, "height": 300, "rotation": 0}
             ]
         },
         {
