@@ -83,6 +83,47 @@ class GolfGame {
             this.mouseY = event.clientY - rect.top;
             this.render(); // Aktualizovat vykreslení
         });
+
+        // Vytvoření dialogu
+        this.createLevelCompleteDialog();
+    }
+
+    createLevelCompleteDialog() {
+        const dialog = document.createElement('div');
+        dialog.id = 'levelCompleteDialog';
+        dialog.style.position = 'fixed';
+        dialog.style.top = '50%';
+        dialog.style.left = '50%';
+        dialog.style.transform = 'translate(-50%, -50%)';
+        dialog.style.padding = '20px';
+        dialog.style.backgroundColor = 'white';
+        dialog.style.border = '2px solid black';
+        dialog.style.textAlign = 'center';
+        dialog.style.zIndex = '1000';
+        dialog.style.display = 'none'; // Skrytý dialog
+
+        dialog.innerHTML = `
+            <h2>Level Complete!</h2>
+            <p>You completed the level in <strong id="totalMoves"></strong> moves.</p>
+            <button id="nextLevelButton">Next Level</button>
+            <button id="restartLevelButton">Restart Level</button>
+        `;
+
+        document.body.appendChild(dialog);
+
+        // Přidání funkcionality tlačítek
+        const nextLevelButton = document.getElementById('nextLevelButton');
+        const restartLevelButton = document.getElementById('restartLevelButton');
+
+        nextLevelButton.addEventListener('click', () => {
+            document.getElementById('levelCompleteDialog').style.display = 'none'; // Skrytí dialogu
+            this.loadNextLevel(); // Načíst další level
+        });
+
+        restartLevelButton.addEventListener('click', () => {
+            document.getElementById('levelCompleteDialog').style.display = 'none'; // Skrytí dialogu
+            this.reset(); // Restartovat aktuální level
+        });
     }
 
     generateLevelButtons() {
@@ -197,13 +238,30 @@ class GolfGame {
             const distance = Math.sqrt(dx * dx + dy * dy);
 
             if (distance < this.course.hole.radius) {
-                console.log('Ball reached the hole! Level complete.');
+                this.showLevelCompleteDialog(); // Zobrazit dialog o splnění levelu
                 this.stopGame(); // Ukončit hru
                 return;
             }
         }
 
         this.checkBoundaries();
+    }
+
+    showLevelCompleteDialog() {
+        const totalMoves = this.commandNumber; // Počet použitých tahů
+        const dialog = document.getElementById('levelCompleteDialog');
+        const totalMovesElement = document.getElementById('totalMoves');
+        totalMovesElement.textContent = totalMoves;
+        dialog.style.display = 'block'; // Zobrazení dialogu
+    }
+
+    loadNextLevel() {
+        const currentLevelIndex = this.levels.indexOf(this.course);
+        if (currentLevelIndex < this.levels.length - 1) {
+            this.loadLevel(currentLevelIndex + 1); // Načíst další level
+        } else {
+            alert('Congratulations! You completed all levels!');
+        }
     }
 
     handleCircleCollision(obs) {
