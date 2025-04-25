@@ -10,6 +10,7 @@ Blockly Minigolf je interaktivní hra, která kombinuje programování pomocí B
 3. [Definice herního pole](#definice-herního-pole)
 4. [Použití](#použití)
 5. [Technologie](#technologie)
+6. [Odkazy](#odkazy)
 
 ---
 
@@ -81,3 +82,12 @@ Herní pole je definováno v souboru `courses.json`. Každé pole obsahuje:
         }
     ]
 }
+```
+
+---
+
+## Odkazy
+
+- [Blockly](https://developers.google.com/blockly)
+- [Minigolf demo](https://minigolf-blockly.petrvich.eu/)
+- [Zdrojové kódy](https://github.com/vichpetr/minigolf-blockly)
