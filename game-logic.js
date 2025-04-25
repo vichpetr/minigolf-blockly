@@ -349,29 +349,52 @@ class GolfGame {
     }
 
     handleRectCollision(obs) {
-        const ballNextX = this.ball.x + this.ball.vx;
-        const ballNextY = this.ball.y + this.ball.vy;
+        const cos = Math.cos((obs.rotation * Math.PI) / 180);
+        const sin = Math.sin((obs.rotation * Math.PI) / 180);
 
-        if (ballNextX + this.ball.radius > obs.x &&
-            ballNextX - this.ball.radius < obs.x + obs.width &&
-            ballNextY + this.ball.radius > obs.y &&
-            ballNextY - this.ball.radius < obs.y + obs.height) {
+        const relativeX = this.ball.x - (obs.x + obs.width / 2);
+        const relativeY = this.ball.y - (obs.y + obs.height / 2);
 
-            const overlapX = Math.min(
-                Math.abs(ballNextX + this.ball.radius - obs.x),
-                Math.abs(ballNextX - this.ball.radius - (obs.x + obs.width))
-            );
+        const localX = cos * relativeX + sin * relativeY;
+        const localY = -sin * relativeX + cos * relativeY;
 
-            const overlapY = Math.min(
-                Math.abs(ballNextY + this.ball.radius - obs.y),
-                Math.abs(ballNextY - this.ball.radius - (obs.y + obs.height))
-            );
+        const halfWidth = obs.width / 2;
+        const halfHeight = obs.height / 2;
+
+        // Přidání tolerance pro detekci kolizí
+        const tolerance = 0.1;
+
+        if (
+            Math.abs(localX) <= halfWidth + this.ball.radius + tolerance &&
+            Math.abs(localY) <= halfHeight + this.ball.radius + tolerance
+        ) {
+            const overlapX = halfWidth + this.ball.radius - Math.abs(localX);
+            const overlapY = halfHeight + this.ball.radius - Math.abs(localY);
+
+            let normalX = 0;
+            let normalY = 0;
 
             if (overlapX < overlapY) {
-                this.ball.vx *= -0.8;
+                normalX = localX > 0 ? 1 : -1;
             } else {
-                this.ball.vy *= -0.8;
+                normalY = localY > 0 ? 1 : -1;
             }
+
+            const globalNormalX = cos * normalX - sin * normalY;
+            const globalNormalY = sin * normalX + cos * normalY;
+
+            const dotProduct =
+                this.ball.vx * globalNormalX + this.ball.vy * globalNormalY;
+
+            this.ball.vx -= 2 * dotProduct * globalNormalX;
+            this.ball.vy -= 2 * dotProduct * globalNormalY;
+
+            this.ball.vx *= 0.8;
+            this.ball.vy *= 0.8;
+
+            // Posun míčku mimo překážku
+            this.ball.x += globalNormalX * overlapX;
+            this.ball.y += globalNormalY * overlapY;
         }
     }
 
@@ -397,7 +420,7 @@ class GolfGame {
         } else if (this.course.bounds.type === 'polygon') {
             if (!this.isPointInsidePolygon(this.ball.x, this.ball.y, this.course.bounds.points)) {
                 console.warn('Ball hit the polygon boundary!');
-                this.reset(); // Resetovat hru, pokud míček opustí hranice
+                //this.reset(); // Resetovat hru, pokud míček opustí hranice
             }
         }
     }
@@ -407,19 +430,27 @@ class GolfGame {
             return;
         }
 
+        // Aktualizace pozice míčku
         this.ball.x += this.ball.vx;
         this.ball.y += this.ball.vy;
+
+        // Zpomalení míčku (simulace tření)
         this.ball.vx *= 0.98;
         this.ball.vy *= 0.98;
 
+        // Uložení aktuální trajektorie
         const currentPath = this.allPaths[this.allPaths.length - 1].path;
         currentPath.push({ x: this.ball.x, y: this.ball.y });
 
+        // Kontrola kolizí
         this.checkCollisions();
+
+        // Vykreslení hry
         this.render();
 
+        // Kontrola, zda se míček zastavil
         if (Math.hypot(this.ball.vx, this.ball.vy) > 0.1) {
-            setTimeout(() => this.gameLoop(), 50);
+            requestAnimationFrame(() => this.gameLoop()); // Plynulé volání
         } else {
             this.checkCollisions(); // Zkontrolovat jamku po zastavení
             this.stopGame();
