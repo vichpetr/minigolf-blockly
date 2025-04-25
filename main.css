@@ -129,3 +129,18 @@ html, body {
     width: 300px; /* Šířka tabulky */
     flex-shrink: 0; /* Zabrání zmenšení tabulky při nedostatku místa */
 }
+
+#compass-container {
+    position: fixed; /* Pevná pozice */
+    top: 10px; /* Vzdálenost od horního okraje */
+    right: 10px; /* Vzdálenost od pravého okraje */
+    width: 100px; /* Šířka kontejneru */
+    height: 100px; /* Výška kontejneru */
+    background-color: rgba(255, 255, 255, 0.8); /* Poloprůhledné pozadí */
+    border: 1px solid black; /* Ohraničení */
+    border-radius: 50%; /* Kulatý tvar */
+    display: flex; /* Flexbox pro zarovnání obsahu */
+    justify-content: center; /* Horizontální zarovnání */
+    align-items: center; /* Vertikální zarovnání */
+    z-index: 1000; /* Zajištění, že bude nad ostatními prvky */
+}

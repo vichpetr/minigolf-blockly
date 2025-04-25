@@ -546,6 +546,9 @@ class GolfGame {
         // Vykreslení dalších prvků (startovní pozice, překážky, jamka, vlaječka, míček)
         this.renderGameElements();
 
+        // Vykreslení kompasu
+        this.renderCompass();
+
          // Vykreslení souřadnic myši
     this.ctx.font = '14px Arial';
     this.ctx.fillStyle = 'black';
@@ -645,6 +648,56 @@ class GolfGame {
             this.ball.radius * 2,
             this.ball.radius * 2
         );
+    }
+
+    renderCompass() {
+        const compassCanvas = document.getElementById('compassCanvas');
+        const ctx = compassCanvas.getContext('2d');
+
+        // Vyčistit plátno
+        ctx.clearRect(0, 0, compassCanvas.width, compassCanvas.height);
+
+        // Střed kompasu
+        const centerX = compassCanvas.width / 2;
+        const centerY = compassCanvas.height / 2;
+        const radius = 40;
+
+        // Vykreslení kruhu
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+        ctx.strokeStyle = 'black';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Označení severu (N), jihu (S), východu (E) a západu (W)
+        ctx.font = '12px Arial';
+        ctx.fillStyle = 'black';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('N', centerX, centerY - radius + 10);
+        ctx.fillText('S', centerX, centerY + radius - 10);
+        ctx.fillText('E', centerX + radius - 10, centerY);
+        ctx.fillText('W', centerX - radius + 10, centerY);
+
+        // Vykreslení směru (např. aktuálního úhlu)
+        const angle = Math.atan2(this.ball.vy, this.ball.vx); // Úhel pohybu míčku v radiánech
+        const degrees = (angle * 180) / Math.PI; // Převod na stupně
+        const normalizedDegrees = (degrees + 360) % 360; // Normalizace na rozsah 0–360
+
+        const arrowX = centerX + Math.cos(angle) * radius * 0.8;
+        const arrowY = centerY + Math.sin(angle) * radius * 0.8;
+
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.lineTo(arrowX, arrowY);
+        ctx.strokeStyle = 'red';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Zobrazení úhlu ve stupních ve středu kompasu
+        ctx.font = '14px Arial';
+        ctx.fillStyle = 'blue';
+        ctx.fillText(`${Math.round(normalizedDegrees)}°`, centerX, centerY);
     }
 
     stopGame() {
