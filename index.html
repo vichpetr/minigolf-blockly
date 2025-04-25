@@ -23,7 +23,23 @@
             <div id="current-level-info" style="margin-bottom: 10px; font-size: 16px; font-weight: bold;">
                 Current Level:
             </div>
-          <canvas id="gameCanvas" width="800" height="600"></canvas>
+            <div class="game-container">
+                <canvas id="gameCanvas" width="800" height="600"></canvas>
+                <div id="results-container">
+                    <h3>Results</h3>
+                    <table id="results-table" border="1" style="width: 100%; text-align: center;">
+                        <thead>
+                            <tr>
+                                <th>Level</th>
+                                <th>Moves</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Výsledky budou dynamicky přidány zde -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -101,6 +117,9 @@
             });
 
             workspace.addChangeListener(Blockly.Events.disableOrphans);
+
+            // Předání pracovního prostoru do hry
+            game.blocklyWorkspace = workspace;
 
             document.getElementById('run-code').addEventListener('click', function() {
                 game.reset();

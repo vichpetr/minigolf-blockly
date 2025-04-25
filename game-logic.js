@@ -7,6 +7,7 @@ class GolfGame {
 
         // Další vlastnosti...
         this.completedLevels = []; // Seznam splněných levelů
+        this.results = {}; // Výsledky: { levelIndex: moves }
 
         // Načtení textur
         this.backgroundTexture = new Image();
@@ -92,6 +93,9 @@ class GolfGame {
 
         // Vytvoření dialogu
         this.createLevelCompleteDialog();
+
+        // Aktualizovat tabulku výsledků
+        this.updateResultsTable();
     }
 
     createLevelCompleteDialog() {
@@ -111,6 +115,10 @@ class GolfGame {
         dialog.innerHTML = `
             <h2>Level Complete!</h2>
             <p>You completed the level in <strong id="totalMoves"></strong> moves.</p>
+            <h3>Completed Levels</h3>
+            <ul id="completedLevelsList" style="text-align: left; padding: 0; list-style: none;">
+                <!-- Seznam splněných levelů bude dynamicky přidán zde -->
+            </ul>
             <button id="nextLevelButton">Next Level</button>
             <button id="restartLevelButton">Restart Level</button>
         `;
@@ -189,6 +197,9 @@ class GolfGame {
 
         // Resetovat hru
         this.reset();
+
+        // Resetovat Blockly pole
+        this.resetBlocklyWorkspace();
 
         // Aktualizovat tlačítka levelů
         this.generateLevelButtons();
@@ -281,7 +292,31 @@ class GolfGame {
         const dialog = document.getElementById('levelCompleteDialog');
         const totalMovesElement = document.getElementById('totalMoves');
         totalMovesElement.textContent = totalMoves;
+
+        // Přidání aktuálního levelu do seznamu splněných levelů
+        const currentLevelIndex = this.levels.indexOf(this.course);
+        if (!this.completedLevels.includes(currentLevelIndex)) {
+            this.completedLevels.push(currentLevelIndex); // Přidat aktuální level do splněných
+        }
+
+        // Generování seznamu splněných levelů
+        const completedLevelsList = document.getElementById('completedLevelsList');
+        completedLevelsList.innerHTML = ''; // Vyčistit předchozí obsah
+        this.completedLevels.forEach(levelIndex => {
+            const levelName = this.levels[levelIndex].name;
+            const moves = this.results[levelIndex] || 'N/A'; // Počet tahů nebo "N/A"
+            const listItem = document.createElement('li');
+            listItem.textContent = `${levelName}: ${moves} moves`;
+            completedLevelsList.appendChild(listItem);
+        });
+
         dialog.style.display = 'block'; // Zobrazení dialogu
+
+        // Uložit výsledek pro aktuální level
+        this.results[currentLevelIndex] = totalMoves;
+
+        // Aktualizovat tabulku výsledků
+        this.updateResultsTable();
     }
 
     loadNextLevel() {
@@ -587,5 +622,30 @@ class GolfGame {
         this.ball.vy = 0;
 
         this.render();
+    }
+
+    resetBlocklyWorkspace() {
+        if (this.blocklyWorkspace) {
+            this.blocklyWorkspace.clear(); // Vymaže všechny bloky
+        } else {
+            console.warn('Blockly workspace is not initialized.');
+        }
+    }
+
+    updateResultsTable() {
+        const resultsTableBody = document.querySelector('#results-table tbody');
+        resultsTableBody.innerHTML = ''; // Vyčistit tabulku
+
+        Object.keys(this.results).forEach(levelIndex => {
+            const levelName = this.levels[levelIndex].name;
+            const moves = this.results[levelIndex];
+
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${levelName}</td>
+                <td>${moves}</td>
+            `;
+            resultsTableBody.appendChild(row);
+        });
     }
 }

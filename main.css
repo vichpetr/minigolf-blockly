@@ -12,7 +12,7 @@ html, body {
     box-sizing: border-box;
   }
   .left-panel {
-    width: 30%;
+    width: 60%;
     padding: 10px;
     border-right: 1px solid #ccc;
     overflow-y: auto;
@@ -106,3 +106,26 @@ html, body {
     border: 1px solid #ccc;
     background-color: #fff;
   }
+
+  .right-panel {
+    display: flex;
+    flex-direction: column;
+}
+
+.game-container {
+    display: flex;
+    flex-direction: row; /* Zarovná prvky horizontálně */
+    align-items: flex-start; /* Zarovná herní plátno a tabulku nahoře */
+    gap: 20px; /* Mezera mezi plátnem a tabulkou */
+    max-width: 100%; /* Zajistí, že se obsah přizpůsobí šířce */
+}
+
+#gameCanvas {
+    border: 1px solid black;
+    flex-shrink: 0; /* Zabrání zmenšení plátna při nedostatku místa */
+}
+
+#results-container {
+    width: 300px; /* Šířka tabulky */
+    flex-shrink: 0; /* Zabrání zmenšení tabulky při nedostatku místa */
+}
