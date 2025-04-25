@@ -50,6 +50,7 @@ class GolfGame {
         this.commandQueue = [];
         this.commandNumber = 0;
         this.currentCommandNumber = 0;
+        this.compassAngle = 0; // Úhel kompasu
     }
 
     init() {
@@ -96,6 +97,44 @@ class GolfGame {
 
         // Aktualizovat tabulku výsledků
         this.updateResultsTable();
+
+        // Inicializace interakce s kompasem
+        this.initCompassInteraction();
+    }
+
+    initCompassInteraction() {
+        const compassCanvas = document.getElementById('compassCanvas');
+
+        let isDragging = false;
+
+        compassCanvas.addEventListener('mousedown', (event) => {
+            isDragging = true;
+        });
+
+        compassCanvas.addEventListener('mousemove', (event) => {
+            if (!isDragging) return;
+
+            const rect = compassCanvas.getBoundingClientRect();
+            const centerX = rect.left + compassCanvas.width / 2;
+            const centerY = rect.top + compassCanvas.height / 2;
+
+            const dx = event.clientX - centerX;
+            const dy = event.clientY - centerY;
+
+            // Výpočet úhlu v radiánech a převod na stupně
+            const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+            this.compassAngle = (angle + 360) % 360; // Normalizace na rozsah 0–360
+
+            this.renderCompass(); // Aktualizace kompasu
+        });
+
+        compassCanvas.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
+        compassCanvas.addEventListener('mouseleave', () => {
+            isDragging = false;
+        });
     }
 
     createLevelCompleteDialog() {
@@ -258,6 +297,10 @@ class GolfGame {
         const radians = angle * Math.PI / 180;
         this.ball.vx += Math.cos(radians) * power * 0.1;
         this.ball.vy += Math.sin(radians) * power * 0.1;
+
+        // Aktualizace úhlu kompasu
+        this.compassAngle = angle;
+
         this.gameLoop();
     }
 
@@ -679,11 +722,8 @@ class GolfGame {
         ctx.fillText('E', centerX + radius - 10, centerY);
         ctx.fillText('W', centerX - radius + 10, centerY);
 
-        // Vykreslení směru (např. aktuálního úhlu)
-        const angle = Math.atan2(this.ball.vy, this.ball.vx); // Úhel pohybu míčku v radiánech
-        const degrees = (angle * 180) / Math.PI; // Převod na stupně
-        const normalizedDegrees = (degrees + 360) % 360; // Normalizace na rozsah 0–360
-
+        // Vykreslení směru (ručičky kompasu)
+        const angle = this.compassAngle * (Math.PI / 180); // Převod úhlu na radiány
         const arrowX = centerX + Math.cos(angle) * radius * 0.8;
         const arrowY = centerY + Math.sin(angle) * radius * 0.8;
 
@@ -697,7 +737,7 @@ class GolfGame {
         // Zobrazení úhlu ve stupních ve středu kompasu
         ctx.font = '14px Arial';
         ctx.fillStyle = 'blue';
-        ctx.fillText(`${Math.round(normalizedDegrees)}°`, centerX, centerY);
+        ctx.fillText(`${Math.round(this.compassAngle)}°`, centerX, centerY);
     }
 
     stopGame() {
