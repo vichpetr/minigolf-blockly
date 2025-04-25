@@ -349,6 +349,7 @@ class GolfGame {
     }
 
     handleRectCollision(obs) {
+        // Převod souřadnic míčku do lokálního souřadnicového systému překážky
         const cos = Math.cos((obs.rotation * Math.PI) / 180);
         const sin = Math.sin((obs.rotation * Math.PI) / 180);
 
@@ -395,6 +396,12 @@ class GolfGame {
             // Posun míčku mimo překážku
             this.ball.x += globalNormalX * overlapX;
             this.ball.y += globalNormalY * overlapY;
+
+            // Zabránění "uvěznění" míčku
+            if (Math.abs(overlapX) < tolerance && Math.abs(overlapY) < tolerance) {
+                this.ball.x += globalNormalX * 0.5;
+                this.ball.y += globalNormalY * 0.5;
+            }
         }
     }
 
@@ -428,6 +435,15 @@ class GolfGame {
     gameLoop() {
         if (!this.isRunning) {
             return;
+        }
+
+        // Omezení maximální rychlosti míčku
+        const maxSpeed = 10;
+        const speed = Math.hypot(this.ball.vx, this.ball.vy);
+        if (speed > maxSpeed) {
+            const scale = maxSpeed / speed;
+            this.ball.vx *= scale;
+            this.ball.vy *= scale;
         }
 
         // Aktualizace pozice míčku
