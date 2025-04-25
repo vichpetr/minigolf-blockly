@@ -5,6 +5,9 @@ class GolfGame {
         this.course = course;
         this.levels = levels;
 
+        // Další vlastnosti...
+        this.completedLevels = []; // Seznam splněných levelů
+
         // Načtení textur
         this.backgroundTexture = new Image();
         this.backgroundTexture.src = 'img/textures/background.png';
@@ -71,6 +74,9 @@ class GolfGame {
         this.canvas.width = 800;
         this.canvas.height = 600;
 
+        // Nastavit výchozí level (první)
+        this.loadLevel(0);
+
         // Vygenerovat tlačítka levelů
         this.generateLevelButtons();
 
@@ -134,6 +140,20 @@ class GolfGame {
             const button = document.createElement('button');
             button.textContent = `Level ${index + 1}`;
             button.setAttribute('data-title', level.name); // Nastavit název levelu jako tooltip
+
+            // Pokud je level splněný, označit tlačítko
+            if (this.completedLevels.includes(index)) {
+                button.style.backgroundColor = 'green'; // Změna barvy na zelenou
+                button.style.color = 'white';
+                button.textContent += ' ✓'; // Přidat ikonu splnění
+            }
+
+            // Zvýraznění aktuálního levelu
+            if (this.course === level) {
+                button.style.border = '2px solid blue'; // Ohraničení aktuálního levelu
+                button.style.fontWeight = 'bold';
+            }
+
             button.addEventListener('click', () => this.loadLevel(index));
             levelSelector.appendChild(button);
         });
@@ -142,6 +162,12 @@ class GolfGame {
     loadLevel(levelIndex) {
         const selectedLevel = this.levels[levelIndex];
         this.course = selectedLevel;
+
+        // Aktualizace informací o aktuálním levelu
+        const currentLevelInfo = document.getElementById('current-level-info');
+        if (currentLevelInfo) {
+            currentLevelInfo.textContent = `Current Level: ${selectedLevel.name}`;
+        }
 
         // Zkontrolovat, zda start je uvnitř hranic
         if (!this.isPointInsideBounds(selectedLevel.start.x, selectedLevel.start.y)) {
@@ -163,6 +189,9 @@ class GolfGame {
 
         // Resetovat hru
         this.reset();
+
+        // Aktualizovat tlačítka levelů
+        this.generateLevelButtons();
     }
 
     isPointInsideBounds(x, y) {
@@ -257,11 +286,17 @@ class GolfGame {
 
     loadNextLevel() {
         const currentLevelIndex = this.levels.indexOf(this.course);
+        if (!this.completedLevels.includes(currentLevelIndex)) {
+            this.completedLevels.push(currentLevelIndex); // Přidat aktuální level do splněných
+        }
+
         if (currentLevelIndex < this.levels.length - 1) {
             this.loadLevel(currentLevelIndex + 1); // Načíst další level
         } else {
             alert('Congratulations! You completed all levels!');
         }
+
+        this.generateLevelButtons(); // Aktualizovat tlačítka levelů
     }
 
     handleCircleCollision(obs) {
@@ -432,7 +467,7 @@ class GolfGame {
          // Vykreslení souřadnic myši
     this.ctx.font = '14px Arial';
     this.ctx.fillStyle = 'black';
-    this.ctx.fillText(`X: ${Math.round(this.mouseX)}, Y: ${Math.round(this.mouseY)}`, 10, 20);
+    //this.ctx.fillText(`X: ${Math.round(this.mouseX)}, Y: ${Math.round(this.mouseY)}`, 10, 20);
     }
 
     renderGameElements() {
